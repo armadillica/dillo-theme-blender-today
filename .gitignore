@@ -3,8 +3,6 @@
 *.pyc
 *.sublime*
 
-config.py
-
 dist/
 node_modules
 .sass-cache/

@@ -1,9 +1,9 @@
 {
-  "name": "dillo",
+  "name": "blender-today-theme",
   "version": "1.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/armadillica/dillo.git"
+    "url": "https://github.com/armadillica/dillo-theme-blender-today.git"
   },
   "author": "Blender.Today",
   "license": "GPL",
