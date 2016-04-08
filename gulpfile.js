@@ -1,4 +1,5 @@
 var gulp          = require('gulp'),
+    fs            = require('fs'),
     plumber       = require('gulp-plumber'),
     sass          = require('gulp-sass'),
     sourcemaps    = require('gulp-sourcemaps'),
@@ -6,7 +7,27 @@ var gulp          = require('gulp'),
     jade          = require('gulp-jade'),
     uglify        = require('gulp-uglify'),
     concat        = require('gulp-concat'),
+    rename        = require('gulp-rename'),
     livereload    = require('gulp-livereload');
+
+
+// Do we have a config file?
+if (fs.existsSync('./config.json')) {
+    var config = require('./config.json');
+    var theme_folder = config.dillo_install + "/dillo/application/themes/" + config.theme_name;
+
+    gulp.task('default', ['styles', 'templates', 'scripts']);
+
+} else {
+
+    gulp.task('default', function() {
+        process.stdout.write('\n== Your config.json file is missing ==\n');
+        process.stdout.write('* Read more at https://github.com/armadillica/dillo-theme-blueprint\n\n');
+    });
+
+    return
+}
+
 
 /* CSS */
 gulp.task('styles', function() {
@@ -18,7 +39,7 @@ gulp.task('styles', function() {
             ))
         .pipe(autoprefixer("last 3 version", "safari 5", "ie 8", "ie 9"))
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('dist/static/css'))
+        .pipe(gulp.dest(theme_folder + '/static/css'))
         .pipe(livereload());
 });
 
@@ -28,18 +49,31 @@ gulp.task('templates', function() {
         .pipe(jade({
             pretty: false
         }))
-        .pipe(gulp.dest('dist/templates'))
+        .pipe(gulp.dest(theme_folder + '/templates'))
         .pipe(livereload());
 });
 
 /* Scripts */
 gulp.task('scripts', function() {
+    gulp.src('src/scripts/*.js')
+        .pipe(sourcemaps.init())
+        .pipe(uglify())
+        .pipe(rename(function(path){
+            path.extname = '.min.js'
+        }))
+        .pipe(sourcemaps.write("./"))
+        .pipe(gulp.dest(theme_folder + '/static/js'))
+        .pipe(livereload());
+});
+
+/* Scripts Concatenated */
+gulp.task('scripts-tutti', function() {
     gulp.src('src/scripts/uglify/**/*.js')
         .pipe(sourcemaps.init())
         .pipe(concat("tutti.min.js"))
         .pipe(uglify())
         .pipe(sourcemaps.write("./"))
-        .pipe(gulp.dest('dist/static/js'))
+        .pipe(gulp.dest(theme_folder + '/static/js'))
         .pipe(livereload());
 });
 
@@ -53,4 +87,5 @@ gulp.task('watch',function() {
 });
 
 // Run 'gulp' to build everything at once
-gulp.task('default', ['styles', 'templates', 'scripts']);
+gulp.task('default', ['styles', 'templates', 'scripts', 'scripts-tutti']);
+
